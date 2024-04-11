@@ -1,9 +1,9 @@
 import * as alt from 'alt-server';
-import * as Athena from '@AthenaServer/api';
-import { FACTION_EVENTS } from '../../shared/factionEvents';
-import { FactionFuncs } from './funcs';
-import { FactionHandler } from './handler';
-import { FactionPlayerFuncs } from './playerFuncs';
+import * as Athena from '@AthenaServer/api/index.js';
+import { FACTION_EVENTS } from '@AthenaPlugins/athena-plugin-factions/shared/factionEvents.js';
+import { FactionFuncs } from './funcs.js';
+import { FactionHandler } from './handler.js';
+import { FactionPlayerFuncs } from './playerFuncs.js';
 
 const lastInvite: { [character: string]: string } = {};
 
@@ -20,11 +20,11 @@ Athena.systems.messenger.commands.register(
     async (player: alt.Player, type: string, ...name: string[]) => {
         const playerData = Athena.document.character.get(player);
         const factionName = name.join(' ');
-        if (!playerData._id) {
-            Athena.player.emit.message(player, 'playerData._id is: ' + playerData._id);
+        if (!playerData.character_id) {
+            Athena.player.emit.message(player, 'playerData.character_id is: ' + playerData.character_id);
             return;
         }
-        const result = await FactionHandler.add(playerData._id, {
+        const result = await FactionHandler.add(playerData.character_id, {
             bank: 0,
             canDisband: true,
             name: factionName,
@@ -83,7 +83,7 @@ Athena.systems.messenger.commands.register(
         }
 
         const faction = FactionHandler.get(playerData.faction);
-        if (!faction) {
+        if (!playerData.faction) {
             Athena.player.emit.message(player, 'You are not in a faction.');
             return;
         }
@@ -112,11 +112,11 @@ Athena.systems.messenger.commands.register(
         if (playerData.faction) {
             const currentFaction = FactionHandler.get(playerData.faction);
             if (currentFaction) {
-                await FactionFuncs.kickMember(currentFaction, playerData._id);
+                await FactionFuncs.kickMember(currentFaction, playerData.charactercharacter_id);
             }
         }
 
-        FactionFuncs.addMember(faction, playerData._id);
+        FactionFuncs.addMember(faction, playerData.charactercharacter_id);
         Athena.player.emit.message(player, `Moved to Faction: ${faction.name}`);
     },
 );
@@ -128,7 +128,7 @@ Athena.systems.messenger.commands.register(
     (player: alt.Player, playerId: any) => {
         const playerData = Athena.document.character.get(player);
         const faction = FactionHandler.get(playerData.faction);
-        if (!faction) {
+        if (!playerData.faction) {
             Athena.player.emit.message(player, `You are not in a faction.`);
             return;
         }
@@ -161,7 +161,7 @@ Athena.systems.messenger.commands.register(
             return;
         }
 
-        lastInvite[target.data._id] = playerData.faction;
+        lastInvite[target.data.character_id] = playerData.faction;
         Athena.player.emit.message(player, `${target.data.name} was invited to the faction.`);
         Athena.player.emit.message(target.player, `${playerData.name} invited you to faction ${faction.name}.`);
         Athena.player.emit.message(target.player, `Type '/faccept' to join`);
@@ -176,25 +176,25 @@ Athena.systems.messenger.commands.register(
         const playerData = Athena.document.character.get(player);
         if (playerData.faction) {
             Athena.player.emit.message(player, `Already in a faction.`);
-            delete lastInvite[playerData._id];
+            delete lastInvite[playerData.character_id];
             return;
         }
 
-        if (!lastInvite[playerData._id]) {
+        if (!lastInvite[playerData.character_id]) {
             Athena.player.emit.message(player, `Faction invite expired.`);
-            delete lastInvite[playerData._id];
+            delete lastInvite[playerData.character_id];
             return;
         }
 
-        const faction = FactionHandler.get(lastInvite[playerData._id]);
+        const faction = FactionHandler.get(lastInvite[playerData.character_id]);
         if (!faction) {
             Athena.player.emit.message(player, `Faction invite expired.`);
-            delete lastInvite[playerData._id];
+            delete lastInvite[playerData.character_id];
             return;
         }
 
-        delete lastInvite[playerData._id];
-        const result = FactionFuncs.addMember(faction, playerData._id);
+        delete lastInvite[playerData.character_id];
+        const result = FactionFuncs.addMember(faction, playerData.character_id);
         if (!result) {
             Athena.player.emit.message(player, `Failed to join faction.`);
             return;
@@ -206,7 +206,7 @@ Athena.systems.messenger.commands.register(
 
 Athena.systems.messenger.commands.register(
     'fsetowner',
-    '/fsetowner <player_id> - Set a member inside a faction to the owner of their faction.',
+    '/fsetowner <playercharacter_id> - Set a member inside a faction to the owner of their faction.',
     ['admin'],
     async (player: alt.Player, id: string) => {
         const target = Athena.systems.identifier.getPlayer(id);
@@ -222,7 +222,7 @@ Athena.systems.messenger.commands.register(
             return;
         }
 
-        const didUpdate = await FactionFuncs.setOwner(faction, targetData._id.toString());
+        const didUpdate = await FactionFuncs.setOwner(faction, targetData.character_id.toString());
         if (!didUpdate) {
             Athena.player.emit.message(player, `${targetData.name} could not be set the owner of ${faction.name}.`);
             return;

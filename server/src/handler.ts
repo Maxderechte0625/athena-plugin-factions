@@ -1,17 +1,17 @@
 import Database from '@stuyk/ezmongodb';
 import * as alt from 'alt-server';
-import { Collections } from '@AthenaServer/database/collections';
-import { sha256Random } from '@AthenaServer/utility/hash';
-import { DefaultRanks } from '../../shared/defaultData';
-import { Faction, FactionCore, FactionRank } from '../../shared/interfaces';
-import { Character } from '../../../../shared/interfaces/character';
-import { deepCloneObject } from '../../../../shared/utility/deepCopy';
-import * as Athena from '@AthenaServer/api';
-import { LOCALE_KEYS } from '@AthenaShared/locale/languages/keys';
-import { FactionPlayerFuncs } from './playerFuncs';
-import { LocaleController } from '@AthenaShared/locale/locale';
-import { FACTION_EVENTS } from '@AthenaPlugins/athena-plugin-factions/shared/factionEvents';
-import { InventoryView } from '@AthenaPlugins/core-inventory/server/src/view';
+import { Collections } from '@AthenaServer/database/collections.js';
+import { sha256Random } from '@AthenaServer/utility/hash.js';
+import { DefaultRanks } from '@AthenaPlugins/athena-plugin-factions/shared/defaultData.js';
+import { Faction, FactionCore, FactionRank } from '@AthenaPlugins/athena-plugin-factions/shared/interfaces.js';
+import { Character } from '@AthenaShared/interfaces/character.js';
+import { deepCloneObject } from '@AthenaShared/utility/deepCopy.js';
+import * as Athena from '@AthenaServer/api/index.js';
+import { LOCALE_KEYS } from '@AthenaShared/locale/languages/keys.js';
+import { FactionPlayerFuncs } from './playerFuncs.js';
+import { LocaleController } from '@AthenaShared/locale/locale.js';
+import { FACTION_EVENTS } from '@AthenaPlugins/athena-plugin-factions/shared/factionEvents.js';
+import { InventoryView } from '@AthenaPlugins/core-inventory/server/src/view.js';
 
 export const FACTION_COLLECTION = 'factions';
 const factions: { [key: string]: Faction } = {};
@@ -99,7 +99,7 @@ export class FactionHandler {
             _faction.bank = 0;
         }
 
-        const character = await Database.fetchData<Character>('_id', characterOwnerID, Collections.Characters);
+        const character = await Database.fetchData<Character>('character_id', characterOwnerID, Collections.Characters);
         if (!character) {
             alt.logWarning(`Could not find a character with identifier: ${characterOwnerID}`);
             return { status: false, response: `Could not find a character with identifier: ${characterOwnerID}` };
@@ -139,7 +139,7 @@ export class FactionHandler {
 
         character.faction = document._id.toString();
         await Database.updatePartialData(
-            character._id,
+            character.character_id,
             {
                 faction: character.faction,
             },
@@ -204,8 +204,8 @@ export class FactionHandler {
                 Athena.document.character.set(xPlayer, 'faction', null);
 
                 // Add bank balance to owner character
-                if (playerData._id === ownerIdentifier) {
-                    Athena.document.character.set(xPlayer, 'bank', playerData.bank + factionClone.bank, true);
+                if (playerData.character_id === ownerIdentifier) {
+                    xPlayer.setMeta('bank', playerData.bank + factionClone.bank);
                     Athena.player.sync.currencyData(xPlayer);
                     Athena.player.emit.notification(xPlayer, `+$${factionClone.bank}`);
                 }
@@ -214,10 +214,10 @@ export class FactionHandler {
             }
 
             // For non-logged in character owner add bank balance
-            if (!xPlayer && member._id === ownerIdentifier) {
+            if (!xPlayer && member.character_id === ownerIdentifier) {
                 member.bank += factionClone.bank;
                 await Database.updatePartialData(
-                    member._id.toString(),
+                    member.character_id.toString(),
                     { faction: null, bank: member.bank },
                     Collections.Characters,
                 );
@@ -225,7 +225,7 @@ export class FactionHandler {
             }
 
             // Remove faction from character
-            await Database.updatePartialData(member._id.toString(), { faction: null }, Collections.Characters);
+            await Database.updatePartialData(member.character_id.toString(), { faction: null }, Collections.Characters);
         }
 
         // Clear all vehicles...

@@ -1,15 +1,14 @@
 import Database from '@stuyk/ezmongodb';
 import * as alt from 'alt-server';
-import { Collections } from '@AthenaServer/database/collections';
-import { Character } from '../../../../shared/interfaces/character';
-import { FactionHandler } from './handler';
-import { Faction, FactionCharacter, FactionRank, RankPermissions } from '../../shared/interfaces';
-import { FACTION_EVENTS } from '../../shared/factionEvents';
-import * as Athena from '@AthenaServer/api';
-import { IVehicle } from '@AthenaPlugins/gp-items-tuning/server/src/prototypes';
-import { storage } from '@AthenaServer/systems';
-import { player } from '@AthenaServer/api';
-import { OwnedVehicle } from '@AthenaShared/interfaces/vehicleOwned';
+import { Collections } from '@AthenaServer/database/collections.js';
+import { Character } from '@AthenaShared/interfaces/character.js';
+import { FactionHandler } from './handler.js';
+import { Faction, FactionCharacter, FactionRank, RankPermissions } from '@AthenaPlugins/athena-plugin-factions/shared/interfaces.js';
+import { FACTION_EVENTS } from '@AthenaPlugins/athena-plugin-factions/shared/factionEvents.js';
+import * as Athena from '@AthenaServer/api/index.js';
+import { storage } from '@AthenaServer/systems/index.js';
+import { player } from '@AthenaServer/api/index.js';
+import { OwnedVehicle } from '@AthenaShared/interfaces/vehicleOwned.js';
 
 let hasInitialized = false;
 
@@ -56,7 +55,7 @@ export class FactionFuncs {
         }
 
         // Check if in same faction
-        if (vehicleData.owner !== playerData.faction) {
+        if (vehicleData.owner !== player.getMeta('faction')) {
             return false;
         }
 
@@ -67,7 +66,7 @@ export class FactionFuncs {
         }
 
         // Check if the players rank has access to this vehicle specifically
-        const rank = FactionFuncs.getFactionMemberRank(faction, playerData._id.toString());
+        const rank = FactionFuncs.getFactionMemberRank(faction, playerData.character_id.toString());
         if (!rank) {
             return false;
         }

@@ -1,13 +1,13 @@
 import * as alt from 'alt-server';
-import { FactionCharacter, FactionRank, RankPermissions } from '../../shared/interfaces';
-import { CurrencyTypes } from '../../../../shared/enums/currency';
-import { isFlagEnabled } from '../../../../shared/utility/flags';
-import { FACTION_CONFIG } from './config';
-import { FactionFuncs } from './funcs';
-import { FactionHandler } from './handler';
-import * as Athena from '@AthenaServer/api';
-import { FACTION_EVENTS } from '../../shared/factionEvents';
-import { distance } from '../../../../shared/utility/vector';
+import { FactionCharacter, FactionRank, RankPermissions } from '@AthenaPlugins/athena-plugin-factions/shared/interfaces.js';
+import { CurrencyTypes } from '@AthenaShared/enums/currency.js';
+import { isFlagEnabled } from '@AthenaShared/utility/flags.js';
+import { FACTION_CONFIG } from './config.js';
+import { FactionFuncs } from './funcs.js';
+import { FactionHandler } from './handler.js';
+import * as Athena from '@AthenaServer/api/index.js';
+import { FACTION_EVENTS } from '@AthenaPlugins/athena-plugin-factions/shared/factionEvents.js';
+import { distance } from '@AthenaShared/utility/vector.js';
 
 /**
  * Bound to the player to manipulate individual faction functionality.
@@ -49,11 +49,11 @@ export class FactionPlayerFuncs {
             return false;
         }
 
-        if (!faction.members[playerData._id.toString()]) {
+        if (!faction.members[playerData.character_id.toString()]) {
             return false;
         }
 
-        return faction.members[playerData._id.toString()].hasOwnership;
+        return faction.members[playerData.character_id.toString()].hasOwnership;
     }
 
     /**
@@ -85,7 +85,7 @@ export class FactionPlayerFuncs {
             return null;
         }
 
-        const member = faction.members[playerData._id.toString()];
+        const member = faction.members[playerData.character_id.toString()];
         if (!member) {
             return null;
         }
@@ -108,7 +108,7 @@ export class FactionPlayerFuncs {
             return null;
         }
 
-        return faction.members[playerData._id.toString()];
+        return faction.members[playerData.character_id.toString()];
     }
 
     /**
@@ -135,13 +135,13 @@ export class FactionPlayerFuncs {
         }
 
         if (!FactionPlayerFuncs.isOwnerOrAdmin(player)) {
-            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData._id.toString());
+            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData.character_id.toString());
             if (!selfRank.rankPermissions.addMembers) {
                 return false;
             }
         }
 
-        const didUpdate = await FactionFuncs.addMember(faction, targetData._id.toString());
+        const didUpdate = await FactionFuncs.addMember(faction, targetData.character_id.toString());
         if (!didUpdate) {
             return false;
         }
@@ -174,7 +174,7 @@ export class FactionPlayerFuncs {
 
         if (!FactionPlayerFuncs.isOwnerOrAdmin(player)) {
             // Get the current acting member's rank.
-            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData._id);
+            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData.character_id);
             if (!selfRank.rankPermissions.kickMembers) {
                 return false;
             }
@@ -220,7 +220,7 @@ export class FactionPlayerFuncs {
 
         if (!FactionPlayerFuncs.isOwnerOrAdmin(player)) {
             // Get the current acting member's rank.
-            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData._id);
+            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData.character_id);
             if (!selfRank.rankPermissions.manageMembers) {
                 return false;
             }
@@ -266,7 +266,7 @@ export class FactionPlayerFuncs {
 
         if (!FactionPlayerFuncs.isOwnerOrAdmin(player)) {
             // Get the current acting member's rank.
-            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData._id);
+            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData.character_id);
             if (!selfRank.rankPermissions.bankAdd) {
                 return false;
             }
@@ -299,7 +299,7 @@ export class FactionPlayerFuncs {
 
         if (!FactionPlayerFuncs.isOwnerOrAdmin(player)) {
             // Get the current acting member's rank.
-            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData._id);
+            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData.character_id);
             if (!selfRank.rankPermissions.bankRemove) {
                 return false;
             }
@@ -337,7 +337,7 @@ export class FactionPlayerFuncs {
 
         if (!FactionPlayerFuncs.isOwnerOrAdmin(player)) {
             // Get the current acting member's rank.
-            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData._id);
+            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData.character_id);
             if (!selfRank.rankPermissions.manageRanks) {
                 return false;
             }
@@ -364,7 +364,7 @@ export class FactionPlayerFuncs {
 
         if (!FactionPlayerFuncs.isOwnerOrAdmin(player)) {
             // Get the current acting member's rank.
-            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData._id);
+            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData.character_id);
             if (!selfRank.rankPermissions.manageRanks) {
                 return false;
             }
@@ -394,7 +394,7 @@ export class FactionPlayerFuncs {
 
         if (!FactionPlayerFuncs.isOwnerOrAdmin(player)) {
             // Get the current acting member's rank.
-            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData._id);
+            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData.character_id);
             if (!selfRank.rankPermissions.manageRanks) {
                 return false;
             }
@@ -433,7 +433,7 @@ export class FactionPlayerFuncs {
 
         if (!FactionPlayerFuncs.isOwnerOrAdmin(player)) {
             // Get the current acting member's rank.
-            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData._id);
+            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData.character_id);
             if (!selfRank.rankPermissions.manageRankPermissions) {
                 return false;
             }
@@ -468,7 +468,7 @@ export class FactionPlayerFuncs {
 
         if (!FactionPlayerFuncs.isOwnerOrAdmin(player)) {
             // Get the current acting member's rank.
-            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData._id);
+            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData.character_id);
             if (!selfRank.rankPermissions.manageRanks) {
                 return false;
             }
@@ -496,7 +496,7 @@ export class FactionPlayerFuncs {
 
         if (!FactionPlayerFuncs.isOwnerOrAdmin(player)) {
             // Get the current acting member's rank.
-            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData._id);
+            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData.character_id);
             if (!selfRank.rankPermissions.manageRanks) {
                 return false;
             }
@@ -623,7 +623,7 @@ export class FactionPlayerFuncs {
 
         if (!FactionPlayerFuncs.isOwnerOrAdmin(player)) {
             // Get the current acting member's rank.
-            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData._id);
+            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData.character_id);
             if (!selfRank.rankPermissions.manageVehicles) {
                 result = false;
             }
@@ -661,7 +661,7 @@ export class FactionPlayerFuncs {
 
         if (!FactionPlayerFuncs.isOwnerOrAdmin(player)) {
             // Get the current acting member's rank.
-            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData._id);
+            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData.character_id);
             if (!selfRank.rankPermissions.manageVehicles) {
                 return false;
             }
@@ -695,7 +695,7 @@ export class FactionPlayerFuncs {
 
         if (!FactionPlayerFuncs.isOwnerOrAdmin(player)) {
             // Get the current acting member's rank.
-            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData._id);
+            const selfRank = FactionFuncs.getFactionMemberRank(faction, playerData.character_id);
             if (!selfRank.vehicles) {
                 return false;
             }

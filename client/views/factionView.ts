@@ -1,9 +1,9 @@
 import * as alt from 'alt-client';
-import * as AthenaClient from '@AthenaClient/api';
-import { PLAYER_SYNCED_META } from '../../../../shared/enums/playerSynced';
-import { VEHICLE_SYNCED_META } from '../../../../shared/enums/vehicleSyncedMeta';
-import { FACTION_EVENTS } from '../../shared/factionEvents';
-import { Faction } from '../../shared/interfaces';
+import * as AthenaClient from '@AthenaClient/api/index.js';
+import { PLAYER_SYNCED_META } from '@AthenaShared/enums/playerSynced.js';
+import { VEHICLE_SYNCED_META } from '@AthenaShared/enums/vehicleSyncedMeta.js';
+import { FACTION_EVENTS } from '@AthenaPlugins/athena-plugin-factions/shared/factionEvents.js';
+import { Faction } from '@AthenaPlugins/athena-plugin-factions/shared/interfaces.js';
 
 const onOpen: Array<(view: alt.WebView, faction: Faction) => void> = [];
 const onClose: Array<(view: alt.WebView, faction: Faction) => void> = [];

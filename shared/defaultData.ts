@@ -1,5 +1,5 @@
-import { Complete } from '../../../shared/utility/complete';
-import { FactionRank, RankPermissions } from './interfaces';
+import { Complete } from '@AthenaShared/utility/complete';
+import { FactionRank, RankPermissions } from './interfaces.js';
 
 export const DefaultRanks: Array<FactionRank> = [
     {
